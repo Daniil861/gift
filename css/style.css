@@ -122,7 +122,7 @@ body._loaded {
   overflow: hidden;
   position: relative;
   padding: 0 0.75rem;
-  background: url("../img/main/bg.jpg") 70% 170% no-repeat, linear-gradient(0deg, #070513 62.12%, #1c1736 102.06%);
+  background: url("../img/main/bg-main.jpg") center/cover no-repeat;
 }
 .wrapper_card {
   background: linear-gradient(179.66deg, #0081f9 -1.58%, #1c1736 100.94%) !important;
@@ -173,7 +173,7 @@ body._loaded {
 }
 
 .preloader {
-  background: url("../img/main/bg.jpg") 70% bottom no-repeat, linear-gradient(0deg, #070513 62.12%, #1c1736 102.06%);
+  background: url("../img/main/bg_pre.jpg") center/cover no-repeat;
   width: 100%;
   min-height: 100%;
   position: relative;
