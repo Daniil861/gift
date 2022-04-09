@@ -71,6 +71,11 @@
             }
         }));
     }
+    if (document.querySelector(".card") || document.querySelector(".monster")) sessionStorage.setItem("current-bet", 50);
+    if (document.querySelector(".card")) {
+        if (!sessionStorage.getItem("current-shirt")) sessionStorage.setItem("current-shirt", 1);
+        get_and_write_shirt();
+    }
     const preloader = document.querySelector(".preloader");
     const wrapper = document.querySelector(".wrapper");
     let score = document.querySelector(".check");
@@ -94,8 +99,8 @@
             targetElement.closest(".shop__item").classList.add("_target");
         } else {
             let current_money = +sessionStorage.getItem("money");
-            if (current_money >= 5e3) {
-                delete_money(5e3);
+            if (current_money >= 15e3) {
+                delete_money(15e3);
                 sessionStorage.setItem("shirt-2", true);
                 change_color_button(targetElement.closest(".shop__item"), targetElement.closest(".shop__button"));
             } else no_money();
@@ -106,8 +111,8 @@
             targetElement.closest(".shop__item").classList.add("_target");
         } else {
             let current_money = +sessionStorage.getItem("money");
-            if (current_money >= 1e4) {
-                delete_money(1e4);
+            if (current_money >= 25e3) {
+                delete_money(25e3);
                 sessionStorage.setItem("shirt-3", true);
                 change_color_button(targetElement.closest(".shop__item"), targetElement.closest(".shop__button"));
             } else no_money();
@@ -118,16 +123,15 @@
             targetElement.closest(".shop__item").classList.add("_target");
         } else {
             let current_money = +sessionStorage.getItem("money");
-            if (current_money >= 15e3) {
-                delete_money(15e3);
+            if (current_money >= 4e4) {
+                delete_money(4e4);
                 sessionStorage.setItem("shirt-4", true);
                 change_color_button(targetElement.closest(".shop__item"), targetElement.closest(".shop__button"));
             } else no_money();
         }
-        if (targetElement.closest(".header__button-home")) sessionStorage.setItem("current-bet", 50);
         if (targetElement.closest(".footer-monster__minus")) {
             let current_bet = +sessionStorage.getItem("current-bet");
-            if (current_bet >= 50) {
+            if (current_bet > 50) {
                 sessionStorage.setItem("current-bet", current_bet - 50);
                 document.querySelector(".footer-monster__coins").textContent = sessionStorage.getItem("current-bet");
             }
@@ -140,12 +144,20 @@
                 document.querySelector(".footer-monster__coins").textContent = sessionStorage.getItem("current-bet");
             }
         }
-        if (targetElement.closest(".footer-monster__button")) {
-            document.querySelector(".footer-monster__controls").classList.add("_hold");
-            document.querySelector(".footer-monster__button").classList.add("_hold");
+        if (targetElement.closest(".footer-monster__button_bet")) {
+            add_remove_className(".footer-monster__button_bet", "_hold");
+            add_remove_className(".footer-monster__controls", "_hold");
             delete_money(current_bet());
             sessionStorage.setItem("current-level", 1);
             start_monster();
+        }
+        if (targetElement.closest(".footer-monster__button_card")) {
+            add_remove_className(".footer-monster__controls", "_hold");
+            add_remove_className(".footer-monster__button_card", "_hold");
+            delete_money(current_bet());
+            add_remove_className(".footer-monster__button_high", "_hold");
+            add_remove_className(".footer-monster__button_low", "_hold");
+            start_mini_game();
         }
         if (targetElement.closest(".game-monster__item") && targetElement.closest(".game-monster__item").classList.contains("_visible")) {
             let level = get_current_level();
@@ -153,7 +165,36 @@
             let arr_monsters = filter_arr(arr_current);
             get_click_arr(arr_current, arr_monsters, targetElement);
         }
+        if (targetElement.closest(".footer-monster__button_high")) {
+            sessionStorage.setItem("activ-mode", 1);
+            add_remove_className(".footer-monster__button_high", "_hold");
+            add_remove_className(".footer-monster__button_low", "_hold");
+            add_remove_className(".footer-monster__button_low", "_opacity");
+            document.querySelectorAll(".card__closed").forEach((el => {
+                el.classList.add("_anim");
+            }));
+            document.querySelector(".card__field").classList.remove("_hold");
+        }
+        if (targetElement.closest(".footer-monster__button_low")) {
+            sessionStorage.setItem("activ-mode", 2);
+            add_remove_className(".footer-monster__button_high", "_hold");
+            add_remove_className(".footer-monster__button_high", "_opacity");
+            add_remove_className(".footer-monster__button_low", "_hold");
+            document.querySelectorAll(".card__closed").forEach((el => {
+                el.classList.add("_anim");
+            }));
+            document.querySelector(".card__field").classList.remove("_hold");
+        }
+        if (targetElement.closest(".card__closed")) {
+            targetElement.closest(".card__closed").classList.add("_visible");
+            let number = +targetElement.closest(".card__closed").dataset.number;
+            sessionStorage.setItem("opened-closed-card", number);
+            check_mini_game_over();
+        }
     }));
+    function add_remove_className(block, className) {
+        if (document.querySelector(block).classList.contains(className)) document.querySelector(block).classList.remove(className); else document.querySelector(block).classList.add(className);
+    }
     function remove_class(className, block) {
         document.querySelectorAll(block).forEach((el => {
             if (el.classList.contains(className)) el.classList.remove(className);
@@ -191,7 +232,7 @@
         let arr_current = get_arr_current_level(level);
         add_active_class_arr(arr_current);
         let arr_monsters = filter_arr(arr_current);
-        create_monster(arr_monsters, level);
+        if (level >= 1 && level <= 16) create_monster(arr_monsters, level);
     }
     function filter_arr(arr) {
         let new_arr = arr.filter((el => !el.classList.contains("game-monster__item_level")));
@@ -230,7 +271,7 @@
             visible_monsters(arr_monsters);
         }), 1500);
         setTimeout((() => {
-            check_game_over();
+            check_game_over(block);
         }), 2500);
     }
     function visible_monsters(arr) {
@@ -240,16 +281,32 @@
             if (el.childNodes[0] && 1 == el.childNodes[0].dataset.bad) el.classList.add("_bad");
         }));
     }
-    function check_game_over() {
+    function check_game_over(item) {
         let value = sessionStorage.getItem("clicked-item");
+        let level = +sessionStorage.getItem("current-level");
+        if ("empty" == value && 16 == level || "kind" == value && 16 == level) {
+            let current_level_win = get_current_level();
+            sessionStorage.setItem("win-level", current_level_win);
+            document.querySelector(".play").classList.add("_active");
+            let current_rate = check_level(+sessionStorage.getItem("win-level"));
+            let win_count = +sessionStorage.getItem("current-bet") * current_rate;
+            rate_monster_win.textContent = `x${current_rate}`;
+            money_monster_win.textContent = win_count;
+            add_money(win_count);
+            sessionStorage.setItem("win-level", 0);
+            item.closest(".game-monster__item").classList.add("_green");
+            return false;
+        }
         if ("kind" == value) {
             let current_level_win = get_current_level();
             sessionStorage.setItem("win-level", current_level_win);
             sessionStorage.setItem("current-level", +sessionStorage.getItem("current-level") + 1);
             sessionStorage.setItem("clicked-item", "");
+            item.closest(".game-monster__item").classList.add("_green");
             return start_monster();
         }
         if ("bad" == value) {
+            item.closest(".game-monster__item").classList.add("_red");
             document.querySelector(".play").classList.add("_active");
             if (sessionStorage.getItem("win-level")) {
                 let current_rate = check_level(+sessionStorage.getItem("win-level"));
@@ -264,6 +321,7 @@
             }
         }
         if ("empty" == value) {
+            item.closest(".game-monster__item").classList.add("_green");
             sessionStorage.setItem("current-level", +sessionStorage.getItem("current-level") + 1);
             sessionStorage.setItem("clicked-item", "");
             return start_monster();
@@ -335,6 +393,90 @@
             arr[arr_random[1]].append(hero_2);
             arr[arr_random[2]].append(hero_3);
         }
+    }
+    let card_current_arr = [];
+    function start_mini_game() {
+        document.querySelector(".card__field").classList.add("_visible");
+        let current_card1_arr = get_random_number();
+        let current_card2_arr = get_random_number();
+        let current_card3_arr = get_random_number();
+        let current_card4_arr = get_random_number();
+        let game_arr = [ current_card1_arr, current_card2_arr, current_card3_arr, current_card4_arr ];
+        create_write_card(game_arr, 0, ".card__opened");
+        create_write_card(game_arr, 1, ".card__new-card_1");
+        create_write_card(game_arr, 2, ".card__new-card_2");
+        create_write_card(game_arr, 3, ".card__new-card_3");
+        write_attribute_items_cards(game_arr);
+        sessionStorage.setItem("opened-card", game_arr[0]);
+        setTimeout((() => {
+            document.querySelector(".footer-monster__button_high").classList.add("_anim");
+            document.querySelector(".footer-monster__button_low").classList.add("_anim");
+        }), 2e3);
+        setTimeout((() => {
+            document.querySelector(".footer-monster__button_high").classList.remove("_anim");
+            document.querySelector(".footer-monster__button_low").classList.remove("_anim");
+        }), 3e3);
+    }
+    function get_random_number() {
+        let card = get_random(2, 14);
+        if (card_current_arr.includes(card)) return get_random_number();
+        card_current_arr.push(card);
+        return card;
+    }
+    function create_write_card(arr, count, item) {
+        let card = arr[count];
+        let block = document.createElement("img");
+        block.setAttribute("src", `img/game-2/card-${card}.png`);
+        block.setAttribute("data-number", card);
+        block.setAttribute("alt", "Image");
+        document.querySelector(item).append(block);
+    }
+    function check_mini_game_over() {
+        let open_card = +sessionStorage.getItem("opened-card");
+        let opened_closed_card = +sessionStorage.getItem("opened-closed-card");
+        if (open_card < opened_closed_card && 1 == +sessionStorage.getItem("activ-mode")) setTimeout((() => {
+            document.querySelector(".win").classList.add("_active");
+            let bet = +sessionStorage.getItem("current-bet");
+            let count = 2 * bet;
+            document.querySelector(".win__text").textContent = count;
+            add_money(count);
+        }), 1500); else if (open_card < opened_closed_card && 2 == +sessionStorage.getItem("activ-mode")) setTimeout((() => {
+            document.querySelector(".loose").classList.add("_active");
+        }), 1500); else if (open_card > opened_closed_card && 1 == +sessionStorage.getItem("activ-mode")) setTimeout((() => {
+            document.querySelector(".loose").classList.add("_active");
+        }), 1500); else if (open_card > opened_closed_card && 2 == +sessionStorage.getItem("activ-mode")) setTimeout((() => {
+            document.querySelector(".win").classList.add("_active");
+            let bet = +sessionStorage.getItem("current-bet");
+            let count = 2 * bet;
+            document.querySelector(".win__text").textContent = count;
+            add_money(count);
+        }), 1500);
+    }
+    function write_attribute_items_cards(arr) {
+        document.querySelector(".card__closed_1").setAttribute("data-number", arr[1]);
+        document.querySelector(".card__closed_2").setAttribute("data-number", arr[2]);
+        document.querySelector(".card__closed_3").setAttribute("data-number", arr[3]);
+    }
+    function get_and_write_shirt() {
+        let current_shirt = +sessionStorage.getItem("current-shirt");
+        let shirt_1 = document.createElement("img");
+        let shirt_2 = document.createElement("img");
+        let shirt_3 = document.createElement("img");
+        let shirt_4 = document.createElement("img");
+        let shirt_5 = document.createElement("img");
+        let shirt_6 = document.createElement("img");
+        shirt_1.setAttribute("src", `img/shop/shirt-${current_shirt}.jpg`);
+        shirt_2.setAttribute("src", `img/shop/shirt-${current_shirt}.jpg`);
+        shirt_3.setAttribute("src", `img/shop/shirt-${current_shirt}.jpg`);
+        shirt_4.setAttribute("src", `img/shop/shirt-${current_shirt}.jpg`);
+        shirt_5.setAttribute("src", `img/shop/shirt-${current_shirt}.jpg`);
+        shirt_6.setAttribute("src", `img/shop/shirt-${current_shirt}.jpg`);
+        document.querySelector(".card__closed_1").appendChild(shirt_1);
+        document.querySelector(".card__closed_2").appendChild(shirt_2);
+        document.querySelector(".card__closed_3").appendChild(shirt_3);
+        document.querySelector(".card__image-1").appendChild(shirt_4);
+        document.querySelector(".card__image-2").appendChild(shirt_5);
+        document.querySelector(".card__image-3").appendChild(shirt_6);
     }
     window["FLS"] = true;
     isWebp();
