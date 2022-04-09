@@ -32,7 +32,7 @@
         document.querySelector(".wrapper").classList.add("_visible");
     }
     if (sessionStorage.getItem("money")) document.querySelector(".check").textContent = sessionStorage.getItem("money"); else {
-        sessionStorage.setItem("money", 55e3);
+        sessionStorage.setItem("money", 5e3);
         document.querySelector(".check").textContent = sessionStorage.getItem("money");
     }
     if (document.querySelector(".monster") || document.querySelector(".cards")) {
