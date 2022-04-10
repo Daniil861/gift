@@ -144,21 +144,18 @@
                 document.querySelector(".footer-monster__coins").textContent = sessionStorage.getItem("current-bet");
             }
         }
-        if (targetElement.closest(".footer-monster__button_bet")) {
+        if (targetElement.closest(".footer-monster__button_bet")) if (+sessionStorage.getItem("money") >= +sessionStorage.getItem("current-bet")) {
             add_remove_className(".footer-monster__button_bet", "_hold");
             add_remove_className(".footer-monster__controls", "_hold");
             delete_money(current_bet());
             sessionStorage.setItem("current-level", 1);
             start_monster();
-        }
-        if (targetElement.closest(".footer-monster__button_card")) {
-            add_remove_className(".footer-monster__controls", "_hold");
-            add_remove_className(".footer-monster__button_card", "_hold");
-            delete_money(current_bet());
+        } else no_money();
+        if (targetElement.closest(".footer-monster__button_card")) if (+sessionStorage.getItem("money") >= +sessionStorage.getItem("current-bet")) {
             add_remove_className(".footer-monster__button_high", "_hold");
             add_remove_className(".footer-monster__button_low", "_hold");
-            start_mini_game();
-        }
+            move_mini_game();
+        } else no_money();
         if (targetElement.closest(".game-monster__item") && targetElement.closest(".game-monster__item").classList.contains("_visible")) {
             let level = get_current_level();
             let arr_current = get_arr_current_level(level);
@@ -190,6 +187,34 @@
             let number = +targetElement.closest(".card__closed").dataset.number;
             sessionStorage.setItem("opened-closed-card", number);
             check_mini_game_over();
+        }
+        if (targetElement.closest(".win__button_play")) {
+            document.querySelector(".win").classList.remove("_active");
+            remove_card();
+            add_remove_className(".footer-monster__controls", "_hold");
+            add_remove_className(".footer-monster__button_card", "_hold");
+            add_remove_className(".card__field", "_hold");
+            document.querySelectorAll(".footer-monster__button_select").forEach((el => {
+                if (el.classList.contains("_opacity")) el.classList.remove("_opacity");
+            }));
+            document.querySelectorAll(".card__closed").forEach((el => {
+                if (el.classList.contains("_visible")) el.classList.remove("_visible");
+            }));
+            card_current_arr = [];
+        }
+        if (targetElement.closest(".loose__button_play")) {
+            document.querySelector(".loose").classList.remove("_active");
+            remove_card();
+            add_remove_className(".footer-monster__controls", "_hold");
+            add_remove_className(".footer-monster__button_card", "_hold");
+            add_remove_className(".card__field", "_hold");
+            document.querySelectorAll(".footer-monster__button_select").forEach((el => {
+                if (el.classList.contains("_opacity")) el.classList.remove("_opacity");
+            }));
+            document.querySelectorAll(".card__closed").forEach((el => {
+                if (el.classList.contains("_visible")) el.classList.remove("_visible");
+            }));
+            card_current_arr = [];
         }
     }));
     function add_remove_className(block, className) {
@@ -227,6 +252,7 @@
     function get_random(min, max) {
         return Math.floor(Math.random() * (max - min) + min);
     }
+    let current_arr_monst = [];
     function start_monster() {
         let level = get_current_level();
         let arr_current = get_arr_current_level(level);
@@ -338,7 +364,6 @@
         if (1 == level) rate = 1; else if (2 == level) rate = 2; else if (3 == level) rate = 5; else if (4 == level) rate = 10; else if (5 == level) rate = 15; else if (6 == level) rate = 32; else if (7 == level) rate = 42; else if (8 == level) rate = 53; else if (9 == level) rate = 60; else if (10 == level) rate = 63; else if (11 == level) rate = 70; else if (12 == level) rate = 75; else if (13 == level) rate = 80; else if (14 == level) rate = 90; else if (15 == level) rate = 120; else if (16 == level) rate = 160;
         return rate;
     }
-    let current_arr_monst = [];
     function get_random_numbers_arr(mn, mx) {
         if (0 == current_arr_monst.length) {
             let num1 = get_random(mn, mx);
@@ -394,7 +419,12 @@
             arr[arr_random[2]].append(hero_3);
         }
     }
-    let card_current_arr = [];
+    function move_mini_game() {
+        add_remove_className(".footer-monster__controls", "_hold");
+        add_remove_className(".footer-monster__button_card", "_hold");
+        delete_money(current_bet());
+        start_mini_game();
+    }
     function start_mini_game() {
         document.querySelector(".card__field").classList.add("_visible");
         let current_card1_arr = get_random_number();
@@ -417,6 +447,13 @@
             document.querySelector(".footer-monster__button_low").classList.remove("_anim");
         }), 3e3);
     }
+    function remove_card() {
+        document.querySelector(".card__opened img").remove();
+        document.querySelector(".card__new-card_1 img").remove();
+        document.querySelector(".card__new-card_2 img").remove();
+        document.querySelector(".card__new-card_3 img").remove();
+    }
+    let card_current_arr = [];
     function get_random_number() {
         let card = get_random(2, 14);
         if (card_current_arr.includes(card)) return get_random_number();
