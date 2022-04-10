@@ -127,6 +127,9 @@ body._loaded {
 .wrapper_card {
   background: linear-gradient(179.66deg, #0081f9 -1.58%, #1c1736 100.94%) !important;
 }
+.wrapper_monster {
+  background: linear-gradient(0deg, #0d131c -1.31%, #1c1736 102.06%) !important;
+}
 .wrapper._visible {
   display: flex;
 }
