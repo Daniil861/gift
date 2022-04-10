@@ -5,7 +5,7 @@
 	<title>Gift Game - monster game</title>
 	<meta charset="UTF-8">
 	<meta name="format-detection" content="telephone=no">
-	<link rel="stylesheet" href="css/style.min.css?_v=20220409204214">
+	<link rel="stylesheet" href="css/style.min.css?_v=20220410141740">
 	<link rel="shortcut icon" href="favicon.ico">
 	<!-- <meta name="robots" content="noindex, nofollow"> -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -92,9 +92,12 @@
 			<div class="win__sub-text">You Win!</div>
 			<div class="win__text">0</div>
 			<div class="win__body">
-				<a href="card-game.html" class="win__button button">
+				<!-- <a href="card-game.html" class="win__button win__button_play button">
 					<p>Play again</p>
-				</a>
+				</a> -->
+				<button type="button" class="win__button win__button_play button">
+					<p>Play again</p>
+				</button>
 				<a href="index.html" class="win__button button">
 					<p>Home</p>
 				</a>
@@ -103,9 +106,12 @@
 		<div class="wrapper__loose loose">
 			<div class="loose__sub-text">You Loose!</div>
 			<div class="loose__body">
-				<a href="card-game.html" class="loose__button button">
+				<!-- <a href="card-game.html" class="loose__button loose__button_play button">
 					<p>Play again</p>
-				</a>
+				</a> -->
+				<button type="button" class="loose__button loose__button_play button">
+					<p>Play again</p>
+				</button>
 				<a href="index.html" class="loose__button button">
 					<p>Home</p>
 				</a>
@@ -113,7 +119,7 @@
 		</div>
 
 	</div>
-	<script src="js/app.min.js?_v=20220409204214"></script>
+	<script src="js/app.min.js?_v=20220410141740"></script>
 </body>
 
 </html>
