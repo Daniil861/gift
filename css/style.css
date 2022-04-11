@@ -101,7 +101,6 @@ h6 {
 }
 
 body {
-  touch-action: pan-x pan-y;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease 0s;
